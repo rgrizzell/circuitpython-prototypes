@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Crappy Unit Testing"""
 import asyncio
-from applet import Applet, Job
+from applet import Applet
 
 
 class ExampleApp(Applet):
@@ -12,12 +12,12 @@ class ExampleApp(Applet):
         self.welcome_msg = "'ello world!"
         self.question = "Wonderful weather, innit?"
 
-    @Job
+    @Applet.job
     async def first_task(self):
         print(self.question)
 
     # TODO: Job should take any number of optional parameters.
-    @Job
+    @Applet.job
     async def second_task(self):
         self.welcome_msg = "Oy, mate!"
         print(self.welcome_msg)
@@ -30,7 +30,7 @@ class FauxApp(Applet):
         super().__init__()
 
     # TODO: Make sure jobs only apply to `async def`.
-    @Job
+    @Applet.job
     def not_a_task(self):
         print("No!")
 
@@ -38,11 +38,11 @@ class FauxApp(Applet):
 async def main():
     myapp = ExampleApp()
     print(myapp.__version__)
-    print(Job.all_jobs(myapp))
+    print(Applet.job.all_jobs(myapp))
 
     fauxapp = FauxApp()
     print(fauxapp.__version__)
-    print(Job.all_jobs(fauxapp))
+    print(Applet.job.all_jobs(fauxapp))
 
 if __name__ == "__main__":
     asyncio.run(main())
