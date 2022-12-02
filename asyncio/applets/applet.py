@@ -1,18 +1,22 @@
 """Applet"""
+from __future__ import annotations
+
+
+try:
+    import types
+    from typing import Callable, Coroutine, Iterator
+except ImportError:
+    import _types as types
+
+
 import asyncio
 
 
-class Singleton(type):
-    """Creates a Singleton of the class and allows global access."""
-    __instance = None
-
-    def __call__(cls, *args, **kwargs):
-        if not isinstance(cls.__instance, cls):
-            cls.__instance = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls.__instance
+_c = types.CoroutineType
+_f = types.FunctionType
 
 
-class Applet(metaclass=Singleton):
+class Applet:
     """Defines how an applet is to be run by the Scheduler.
 
     Design Goals:
@@ -35,7 +39,7 @@ class Applet(metaclass=Singleton):
     """
 
     # noinspection PyPep8Naming
-    class job(object):
+    class Job(object):
         """Defines how Jobs should be run by the Scheduler.
 
         Design Goals:
@@ -63,35 +67,61 @@ class Applet(metaclass=Singleton):
             reset the device if absolutely necessary.
         """
 
-        def __init__(self, interval=10):
-            self._interval = interval
+        def __init__(self, coro: Callable, interval=10):
+            self.coro = coro
+            self.interval = interval
 
-        def __call__(self, coro, *args, **kwargs):
-            def add_task(*args, **kwargs):
+        def __call__(self, coro: Callable, *args: any, **kwargs: any):
+            if not hasattr(coro, "send"):
+                raise TypeError("Coroutine expected")
+            self.coro = coro
+
+            def _add_task(*args: any, **kwargs: any):
                 return coro(*args, **kwargs)
 
-            return add_task
+            _add_task.__name__ = coro.__name__
+            _add_task.__doc__ = coro.__doc__
+            return _add_task
 
-        @classmethod
-        def all_jobs(cls, subject):
-            def find_coroutines():
-                for name in dir(subject):
-                    coro = getattr(subject, name)
-                    if isinstance(coro, Applet.job):
-                        yield name, coro
+        def coro(self):
+            """Returns the coroutine object
 
-            return {name: coro for name, coro in find_coroutines()}
+            :return:
+            """
+            return self.coro
 
+    __instance = None
     __version__ = "0.0.0"
 
-    def __init__(self) -> None:
+    def __init__(self, *args: any, **kwargs: any) -> None:
         pass
 
+    def __new__(cls, *args: any, **kwargs: any):
+        """Creates a Singleton"""
+        if not isinstance(cls.__instance, cls):
+            cls.__instance = super(Applet, cls).__new__(cls)
+        return cls.__instance
+
+    def all_jobs(self) -> dict[str, Coroutine]:
+        """
+        :return:
+        """
+        for name in dir(self):
+            job = getattr(self, name)
+            if isinstance(job, Applet.Job):
+                if isinstance(job.coro, _f):
+                    continue
+                if hasattr(job.coro(self), "send"):
+                    yield job
+
     def add_config(self):
+        """Adds applet's configuration"""
         return
 
     async def run_applet(self) -> None:
+        """Run the applet"""
         pass
 
     async def stop_applet(self) -> None:
+        """Stop the applet"""
         pass

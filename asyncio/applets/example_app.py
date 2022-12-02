@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Crappy Unit Testing"""
-import asyncio
+try:
+    import asyncio
+except ImportError:
+    import _asyncio
+
 from applet import Applet
 
 
@@ -12,15 +16,18 @@ class ExampleApp(Applet):
         self.welcome_msg = "'ello world!"
         self.question = "Wonderful weather, innit?"
 
-    @Applet.job
+    @Applet.Job
     async def first_task(self):
         print(self.question)
+        await asyncio.sleep(2)
 
     # TODO: Job should take any number of optional parameters.
-    @Applet.job
-    async def second_task(self):
+    @Applet.Job
+    async def second_task(self, *args):
         self.welcome_msg = "Oy, mate!"
         print(self.welcome_msg)
+        print(args)
+        await asyncio.sleep(0.1)
 
 
 class FauxApp(Applet):
@@ -29,20 +36,30 @@ class FauxApp(Applet):
     def __init__(self):
         super().__init__()
 
-    # TODO: Make sure jobs only apply to `async def`.
-    @Applet.job
+    @Applet.Job
     def not_a_task(self):
-        print("No!")
+        print("If you can read this, its broken!")
+
+
+def list_jobs(applet: Applet):
+    """
+
+    :param applet:
+    """
+    for job in applet.all_jobs():
+        if isinstance(job, Applet.Job):
+            print(job.__dict__)
 
 
 async def main():
+    """ Main Entry Point """
     myapp = ExampleApp()
-    print(myapp.__version__)
-    print(Applet.job.all_jobs(myapp))
+    print(f"MyApp Version: {myapp.__version__}")
+    list_jobs(myapp)
 
     fauxapp = FauxApp()
-    print(fauxapp.__version__)
-    print(Applet.job.all_jobs(fauxapp))
+    print(f"FauxApp Version: {fauxapp.__version__}")
+    list_jobs(fauxapp)
 
 if __name__ == "__main__":
     asyncio.run(main())
