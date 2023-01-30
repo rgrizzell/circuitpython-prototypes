@@ -1,23 +1,18 @@
-"""2nd Attempt"""
+"""3rd Attempt"""
 try:
-    import functools
+    from circuitpython_typing import Union
 except ImportError:
-    import _functools as functools
+    pass
+
+try:
+    from functools import partial
+    from types import GeneratorType
+
+except ImportError:
+    from decorators.lib.circuitpython_functools import partial
+    from _types import GeneratorType
 
 import random
-import time
-
-
-def applet(cls):
-    """Initializes the applet"""
-    if not hasattr(cls, '__tasks__'):
-        cls.__tasks__ = {}
-    for method_name in dir(cls):
-        method = getattr(cls, method_name)
-        if hasattr(method, '__tasks__'):
-            cls.__tasks__.update({method_name: method.__tasks__})
-
-    return cls
 
 
 def gen_id(chars: int = 12) -> str:
@@ -33,128 +28,82 @@ def gen_id(chars: int = 12) -> str:
     return ''.join(random.choice(id_choice) for _ in range(chars))
 
 
-def task(_func=None, task_id=None, interval=10, args=None, kwargs=None):
-    """Generates a list of tasks associated with each function.
-
-    :param _func:
-    :param task_id: ID of the task.
-    :param interval: How long to wait before running again (in seconds)
-    :param args: Arguments passed to the function
-    :param kwargs: Keyword arguments passed to the function
-    :return:
-    """
-    if args is None:
-        args = []
-    if isinstance(args, str):
-        args = [args]
-    if kwargs is None:
-        kwargs = dict()
-
-    """Generate task IDs if not provided"""
-    if not task_id:
-        task_id = gen_id()
-
-    def decorator(func):
-        """Modifies the function and inserts the tasks."""
-        if not hasattr(func, '__tasks__'):
-            setattr(func, '__tasks__', {})
-        getattr(func, '__tasks__').update({
-            task_id: {
-                'args': args,
-                'interval': interval,
-                'kwargs': kwargs,
-            }
-        })
-
-        @functools.wraps(func)
-        def wrapper(*w_args, **w_kwargs):
-            """Return the function as-is."""
-            return func(*w_args, **w_kwargs)
-
-        return wrapper
-
-    if _func is None:
-        return decorator
-    else:
-        return decorator(_func)
-
-
 class Applet(object):
     """Defines how an applet is to be run by the Scheduler."""
-    __tasks__ = {}
+    _tasks = {}
 
-    def __init__(self):
-        pass
+    def __init__(self, name):
+        self._name = name
 
     @property
-    def tasks(self):
-        """Returns the list of tasks in the Applet."""
-        return self.__tasks__
+    def name(self):
+        """The Applet's name.
 
-    @tasks.setter
-    def tasks(self, *args, **kwargs):
-        """Discourage the override of the __tasks__ variable."""
-        raise AttributeError("Overriding tasks not allowed.")
+        :return str: String object representing the Applet name.
+        """
+        return self._name
 
-    def remove_task(self, task_id):
-        """Remove a task associated with the given ID."""
-        for method in self.__tasks__:
-            if hasattr(self.__tasks__, task_id):
-                del self.__tasks__[method][task_id]
-            method = getattr(self, method)
-            if hasattr(method, task_id):
-                del method.__tasks__[task_id]
+    def task(self, task_id: str = None, **func_args):
+        """Registers the function as a task to be executed later.
 
+        :param str task_id: Identification string for the task. Must be unique or any new tasks
+        will be overwritten.
+        :param func_args: Dict of arguments to pass to the function.
+        :return callable: The decorator object that registers the task.
+        """
 
-""" =======
-TEST APPLET
-======= """
+        def decorator(func):
+            """Registers the function as a task."""
+            args = func_args.pop("args", tuple())
+            kwargs = func_args.pop("kwargs", dict())
+            self.add_task(func, task_id, *args, **kwargs)
 
+            # Wrapper allows for multiple task decorators on a single function.
+            def wrapper(*w_args, **w_kwargs):
+                """ Do nothing; return as-is. """
+                return func(*w_args, **w_kwargs)
 
-@applet
-class MyApp(Applet):
-    """Example Implementation"""
+            return wrapper
+        return decorator
 
-    # Most basic usage, runs every 30 seconds.
-    @task
-    def major_tom(self):
-        print("Ground control to Major Tom!")
+    def add_task(self, func: callable, task_id: str = None, *args, **kwargs):
+        """Add a function with arguments as a task to be executed at a later time.
 
-    # Define multiple tasks with different parameters.
-    @task(task_id="ping", interval=15, args=["*beep*"])
-    @task(task_id="hello", args=["Can you hear me Major Tom?", "Can you hear me Major Tom?"])
-    def contact(self, *args):
-        for arg in args:
-            print(arg)
-        if args[0] == "*beep*":
-            print("*boop*")
-        else:
-            print("We read you ground control!")
+        :param func: Function object to execute as a task.
+        :type func: callable
+        :param str task_id: Identification string for the task. Must be unique or any new tasks
+        with matching IDs will be overwritten.
+        :param tuple args: List or Tuple of arguments to pass to the function.
+        :param dict kwargs: Dict of keyword arguments to pass to the function.
+        """
+        # Generate task IDs if not provided
+        if not task_id:
+            task_id = gen_id()
 
-    # Call the decorator like a normal function to create a task.
-    def guitar_solo(self):
-        print("[wailing guitar solo from space]")
-    task(guitar_solo, task_id="signoff")
+        self._tasks.update({
+            task_id: partial(func, *args, **kwargs)
+        })
 
+    def remove_task(self, task_id: str) -> None:
+        """Remove a task associated with the given ID.
 
-""" ==========
-RUN THE APPLET
-========== """
+        :param str task_id: Identification string for the task.
+        """
+        del self._tasks[task_id]
 
+    @property
+    def all_tasks(self) -> GeneratorType:
+        """Get all tasks associated with the Applet.
 
-def run_all_tasks(app):
-    all_tasks = app.tasks
-    for method, tasks in all_tasks.items():
-        call = getattr(app, method)
-        for task_id, ctx in tasks.items():
+        :return: Iterable of tasks executed by the Applet.
+        :rtype: GeneratorType
+        """
+        for task_id, task in self._tasks.items():
+            yield task, task_id
+
+    def run(self):
+        """ Executes the applet """
+        print(f"Starting {self._name}")
+        for task, task_id in self.all_tasks:
             print(f"Executing: {task_id}")
-            call(*ctx['args'], **ctx['kwargs'])
-            time.sleep(ctx['interval'])
-
-
-if __name__ == '__main__':
-    myapp = MyApp()
-    myapp.major_tom()
-    myapp.contact("Come in Major Tom.", "*beep*")
-
-    run_all_tasks(myapp)
+            task()
