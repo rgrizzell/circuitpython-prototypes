@@ -1,10 +1,12 @@
 # Asyncio - Applets
 Async Applet Framework for CircuitPython
 
-Built around the Observer Pattern, Applets are loosely decoupled modules
+Influenced heavily by Flask, Applets are loosely decoupled modules
 that are executed by the Scheduler. Jobs act as the abstract representation
 of Asyncio Coroutines with Scheduler-specific information, such as run interval,
 run-on-boot, and hardware state changes.
+
+https://flask.palletsprojects.com/en/2.2.x/design/
 
 ## User Stories
 

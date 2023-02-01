@@ -8,6 +8,10 @@ def _f(): pass
 FunctionType = type(_f)  # noqa
 
 
+def _g(): yield 1
+GeneratorType = type(_g)  # noqa
+
+
 async def _c():
     await asyncio.sleep(0)
 CoroutineType = type(_c())
