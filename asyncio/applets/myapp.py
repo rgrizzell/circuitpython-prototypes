@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """ My Example Applet """
 try:
     import asyncio
@@ -11,16 +10,16 @@ app = Applet("MyApp")
 
 
 @app.task()
-async def major_tom():
+async def major_tom() -> None:
     """ The one and only """
     print("Ground control to Major Tom!")
 
 
 # Define multiple tasks with different parameters.
-@app.task(task_id="ping", args=("*beep*",))
-@app.task(task_id="hello", args=("Can you hear me Major Tom?", "Can you hear me Major Tom?"))
+@app.task(task_id="ping", interval=2000, args=("*beep*",))
+@app.task(task_id="hello", interval=5000, args=("Can you hear me Major Tom?", "Can you hear me Major Tom?"))
 @app.task(task_id="listen", kwargs={"frequency": 9001})
-async def contact(*args, **kwargs):
+async def contact(*args, **kwargs) -> None:
     """ Contact the crew """
     for arg in args:
         print(arg)
@@ -39,5 +38,5 @@ async def guitar_solo() -> None:
     print("[wailing guitar solo from space]")
 
 
-app.add_task(guitar_solo, task_id="signoff")
+app.add_task(guitar_solo, interval=10000)
 

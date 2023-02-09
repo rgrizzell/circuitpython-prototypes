@@ -8,6 +8,12 @@ run-on-boot, and hardware state changes.
 
 https://flask.palletsprojects.com/en/2.2.x/design/
 
+## Requirements
+- [Adafruit CircuitPython Ticks](https://github.com/adafruit/Adafruit_CircuitPython_Ticks)
+- [Adafruit CircuitPython asyncio](https://github.com/adafruit/Adafruit_CircuitPython_asyncio)
+- [CircuitPython Functools](https://github.com/tekktrik/CircuitPython_Functools)
+
+
 ## User Stories
 
 As a core developer, I want to create a list (or generator) of Asyncio tasks
@@ -19,14 +25,3 @@ or hardware state changes so that I can keep my code simple.
 
 As a user, I want the interface to be responsive when I send inputs so that I
 don't have to wait for background tasks to complete.
-
-## TODO:
-- Return list of Applet Jobs
-- Job decorator accepts parameters
-  - Triggers
-    - On interval
-    - On start
-    - On exit
-    - Hardware state
-  - Timeout
-
