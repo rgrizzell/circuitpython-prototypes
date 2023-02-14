@@ -7,8 +7,7 @@ except ImportError:
 try:
     from functools import partial
     from types import GeneratorType
-
-except ImportError:
+except (ImportError, NameError):
     from decorators.lib.circuitpython_functools import partial
     from _types import GeneratorType
 

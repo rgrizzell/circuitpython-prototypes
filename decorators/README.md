@@ -1,11 +1,14 @@
 # Decorators
-Flask-like implementation of decorators on CircuitPython.
+Flask-like implementation of decorators on CircuitPython. Multiple decorators are registered in a bottom-up order. In
+essense, the decorator closest to the function is registered first. In CircuitPython function objects are immutable and
+can not have new attributes assigned to it. A `functool.partial()` is used instead.
+## Requirements
+- [CircuitPython Functools](https://github.com/tekktrik/CircuitPython_Functools)
 
-## Requires
-* [CircuitPython_Functools](https://github.com/tekktrik/CircuitPython_Functools) (CircuitPython Community Bundle)
+## Running
+1. Download the above requirements
+2. Copy the requirements to `CIRCUITPY/lib`.
+3. Copy the project files to `CIRCUITPY/`.
+4. Reload/restart the device.
 
-## Notes
-* Multiple decorators are registered in a bottom-up order. In essense, the decorator closest to the function is 
-registered first.
-* Function objects are immutable and can not have new attributes assigned to it. A `functool.partial()` is used instead.
-This could be extended to Asyncio Coroutines instead.
+*Tested on Raspberry Pi Pico.*
