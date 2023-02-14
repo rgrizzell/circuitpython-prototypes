@@ -21,6 +21,44 @@ https://flask.palletsprojects.com/en/2.2.x/design/
 
 *Tested on Raspberry Pi Pico.*
 
+## Write your Own
+
+Import and name your Applet.
+```python
+from applet import Applet
+app = Applet("MyApp")
+```
+Run a task once at start-up.
+```python
+@app.task()
+async def major_tom():
+    print("Ground control to Major Tom!")
+```
+Add multiple tasks based on one function. Set task IDs, interval, and keyword arguments.
+```python
+@app.task(task_id="ping", interval=2000, args=("*beep*",))
+@app.task(task_id="hello", interval=5000, args=("Can you hear me Major Tom?", "Can you hear me Major Tom?"))
+@app.task(task_id="listen", kwargs={"frequency": 9001})
+async def contact(*args, **kwargs):
+    for arg in args:
+        print(arg)
+    for key, val in kwargs.items():
+        print(key, val)
+    if len(args) > 0:
+        if args[0] == "*beep*":
+            print("*boop*")
+        else:
+            print("We read you ground control!")
+```
+Register the task later in the execution.
+```python
+async def guitar_solo():
+    """ Where did you get that? """
+    print("[wailing guitar solo from space]")
+
+app.add_task(guitar_solo, interval=10000)
+```
+
 ## User Stories
 
 As a core developer, I want to create a list (or generator) of Asyncio tasks
