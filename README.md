@@ -1,2 +1,2 @@
-# circuitpython-examples
-Collection of snippets, examples, and applications for CircuitPython
+# circuitpython-prototypes
+Collection of snippets, examples, and prototypes for CircuitPython.
