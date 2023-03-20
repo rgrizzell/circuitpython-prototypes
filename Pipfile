@@ -4,9 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-adafruit-circuitpython-typing = "*"
+adafruit-blinka = "*"
+adafruit-blinka-displayio = "*"
 adafruit-circuitpython-asyncio = "*"
+adafruit-circuitpython-displayio-layout = "*"
 adafruit-circuitpython-ticks = "*"
+adafruit-circuitpython-typing = "*"
+pillow = "*"
 
 [dev-packages]
 
