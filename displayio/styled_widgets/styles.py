@@ -2,13 +2,24 @@ from adafruit_display_shapes.rect import Rect
 from adafruit_display_shapes.roundrect import RoundRect
 from adafruit_display_text.label import Label
 
+from widgets import StyledWidget
+
 
 class Style:
-    def __init__(self, name=None):
-        self.name = name
+    def __init__(self, name: str = None, *allowed_types):
+        self._name = name
+        self._allowed_types = allowed_types or StyledWidget
+
+    def __repr__(self):
+        return f"{self._name}"
+
+    def _check_widget_type(self, widget: StyledWidget):
+        """ TODO: Figure out a way to check only once instead of every render."""
+        if not isinstance(widget, self._allowed_types):
+            raise TypeError(f"{type(widget)} not of types {self._allowed_types}")
 
     def render(self, widget):
-        raise NotImplementedError("Subclasses should override the render function!")
+        self._check_widget_type(widget)
 
 
 class ButtonStyle(Style):
@@ -31,6 +42,7 @@ class Box(ButtonStyle):
             outline=self.outline,
             stroke=1
         )
+
         if widget.text is not None:
             widget[1] = Label(
                 self.font,
@@ -39,6 +51,9 @@ class Box(ButtonStyle):
                 anchor_point=(0.5, 0.5),
                 anchored_position=(widget.width // 2, widget.height // 2)
             )
+        else:
+            if widget[1]:
+                del widget[1]
 
 
 class RoundedBox(ButtonStyle):
@@ -46,7 +61,7 @@ class RoundedBox(ButtonStyle):
         self.radius = radius
         super().__init__(*args, **kwargs)
 
-    def _render(self, widget):
+    def render(self, widget):
         widget[0] = RoundRect(
             x=0,
             y=0,
@@ -57,7 +72,8 @@ class RoundedBox(ButtonStyle):
             outline=self.outline,
             stroke=1
         )
-        if widget.text is not None:
+
+        if widget.text:
             widget[1] = Label(
                 self.font,
                 scale=self.font_scale,
@@ -65,3 +81,6 @@ class RoundedBox(ButtonStyle):
                 anchor_point=(0.5, 0.5),
                 anchored_position=(widget.width // 2, widget.height // 2)
             )
+        else:
+            if widget[1]:
+                del widget[1]
