@@ -1,25 +1,26 @@
+from displayio import TileGrid
+from adafruit_displayio_layout.widgets.widget import Widget
 from adafruit_display_shapes.rect import Rect
 from adafruit_display_shapes.roundrect import RoundRect
 from adafruit_display_text.label import Label
 
-from widgets import StyledWidget
-
 
 class Style:
-    def __init__(self, name: str = None, *allowed_types):
+    def __init__(self, name: str = None):
         self._name = name
-        self._allowed_types = allowed_types or StyledWidget
 
     def __repr__(self):
-        return f"{self._name}"
+        return f"{self.__class__.__name__}('{self._name}')"
 
-    def _check_widget_type(self, widget: StyledWidget):
-        """ TODO: Figure out a way to check only once instead of every render."""
-        if not isinstance(widget, self._allowed_types):
-            raise TypeError(f"{type(widget)} not of types {self._allowed_types}")
+    def render(self, widget: Widget):
+        pass
+    @property
+    def name(self):
+        return self._name
 
-    def render(self, widget):
-        self._check_widget_type(widget)
+    @name.setter
+    def name(self, new_name: str):
+        self._name = str(new_name)
 
 
 class ButtonStyle(Style):
@@ -31,9 +32,9 @@ class ButtonStyle(Style):
         super().__init__(*args, **kwargs)
 
 
-class Box(ButtonStyle):
-    def render(self, widget):
-        widget[0] = Rect(
+class BoxButtonStyle(ButtonStyle):
+    def render(self, widget: Widget):
+        self.background = Rect(
             x=0,
             y=0,
             width=widget.width,
@@ -43,26 +44,28 @@ class Box(ButtonStyle):
             stroke=1
         )
 
-        if widget.text is not None:
-            widget[1] = Label(
+        if hasattr(widget, 'text'):
+            self.label = Label(
                 self.font,
                 scale=self.font_scale,
                 text=widget.text,
                 anchor_point=(0.5, 0.5),
                 anchored_position=(widget.width // 2, widget.height // 2)
             )
-        else:
-            if widget[1]:
-                del widget[1]
+
+        widget.insert(0, self.background)
+        widget.insert(1, self.label)
+        while len(widget) > 2:
+            widget.pop(-1)
 
 
-class RoundedBox(ButtonStyle):
-    def __init__(self, radius, *args, **kwargs):
+class RoundedBoxButtonStyle(ButtonStyle):
+    def __init__(self, radius, fill, outline, font, font_scale, *args, **kwargs):
         self.radius = radius
-        super().__init__(*args, **kwargs)
+        super().__init__(fill, outline, font, font_scale, *args, **kwargs)
 
-    def render(self, widget):
-        widget[0] = RoundRect(
+    def render(self, widget: Widget):
+        self.background = RoundRect(
             x=0,
             y=0,
             r=self.radius,
@@ -73,14 +76,16 @@ class RoundedBox(ButtonStyle):
             stroke=1
         )
 
-        if widget.text:
-            widget[1] = Label(
+        if hasattr(widget, 'text'):
+            self.label = Label(
                 self.font,
                 scale=self.font_scale,
                 text=widget.text,
                 anchor_point=(0.5, 0.5),
                 anchored_position=(widget.width // 2, widget.height // 2)
             )
-        else:
-            if widget[1]:
-                del widget[1]
+
+        widget.insert(0, self.background)
+        widget.insert(1, self.label)
+        while len(widget) > 2:
+            widget.pop(-1)

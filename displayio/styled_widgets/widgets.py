@@ -1,5 +1,6 @@
 """ DisplayIO Layout Widgets with a bit of flair """
 from adafruit_displayio_layout.widgets.widget import Widget
+
 from styles import Style
 
 
@@ -25,8 +26,7 @@ class StyledWidget(Widget):
             anchored_position=anchored_position
         )
 
-        self._style = style
-        self._style.render(self)
+        self.style = style
 
     def _empty_self_group(self):
         while len(self) > 0:
@@ -49,9 +49,10 @@ class StyledWidget(Widget):
 
     @style.setter
     def style(self, new_style: Style) -> None:
-        if issubclass(type(new_style), Style):
-            self._style = new_style
-            self._style.render(self)
+        if not issubclass(type(new_style), Style):
+            raise TypeError(f"{type(new_style)} not of type Style")
+        self._style = new_style
+        self._style.render(self)
 
 
 class Button(StyledWidget):

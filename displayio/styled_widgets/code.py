@@ -9,7 +9,7 @@ import supervisor
 from adafruit_display_shapes.rect import Rect
 from adafruit_display_shapes.circle import Circle
 
-from styles import Box
+from styles import BoxButtonStyle, RoundedBoxButtonStyle
 from widgets import Button
 
 _WIDTH = 320
@@ -86,31 +86,38 @@ if __name__ == "__main__":
     workspace.append(calibration_square)
     workspace.append(center_circle)
 
+    button_style_box = BoxButtonStyle(
+        fill=_FILL,
+        outline=_OUTLINE,
+        font=_FONT,
+        font_scale=_FONT_SCALE
+    )
+    button_style_roundedbox = RoundedBoxButtonStyle(
+        radius=10,
+        fill=_FILL,
+        outline=_OUTLINE,
+        font=_FONT,
+        font_scale=_FONT_SCALE
+    )
     button = Button(
         text="Test",
         width=100,
         height=40,
         anchor_point=(0.5, 0.5),
         anchored_position=(100, 100),
-        style=Box(
-            fill=_FILL,
-            outline=_OUTLINE,
-            font=_FONT,
-            font_scale=_FONT_SCALE
-        )
+        style=button_style_box
     )
     workspace.append(button)
 
     screen.append(workspace)
-    big_time = 0
+    count = 0
     while True:
         workspace.x = 20
         time.sleep(10)
         workspace.x = 80
-        if big_time % 3:
-            button.resize(60, 80)
+        if count % 3:
+            button.style = button_style_roundedbox
         else:
-            button.resize(100, 40)
-        big_time += 1
+            button.style = button_style_box
+        count += 1
         time.sleep(10)
-
