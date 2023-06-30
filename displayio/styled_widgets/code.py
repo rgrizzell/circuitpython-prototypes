@@ -23,10 +23,12 @@ _FONT_W, _FONT_H = _FONT.get_bounding_box()
 _FONT_SCALE = 2
 
 
-if __name__ == "__main__":
-    supervisor.runtime.autoreload = False
+def init_display() -> Group:
+    """Initialize the display device
 
-    """Define pins connected to the chip"""
+    :return: displayio.Group
+    """
+    # Define pins connected to the chip
     tft_sck = board.GP18
     tft_mosi = board.GP19
     tft_blk = board.GP20
@@ -34,7 +36,7 @@ if __name__ == "__main__":
     tft_cs = board.GP21
     tft_rst = None
 
-    """Reset the chip and re-initialize it"""
+    # Reset the chip and re-initialize it
     release_displays()
     tft_spi = busio.SPI(tft_sck, tft_mosi)
     tft_bus = FourWire(
@@ -53,8 +55,14 @@ if __name__ == "__main__":
 
     screen = Group()
     display.show(screen)
+    return screen
 
-    workspace = Group(x=20, y=20)
+
+def build_workspace() -> Group:
+    """Build the workspace with which to develop
+
+    :return: displayio.Group
+    """
     border = Rect(
         x=0,
         y=0,
@@ -64,8 +72,6 @@ if __name__ == "__main__":
         outline=_OUTLINE,
         stroke=1
     )
-    workspace.append(border)
-
     calibration_square = Rect(
         x=0,
         y=0,
@@ -83,8 +89,19 @@ if __name__ == "__main__":
         outline=_OUTLINE,
         stroke=1
     )
+
+    workspace = Group()
+    workspace.append(border)
     workspace.append(calibration_square)
     workspace.append(center_circle)
+    return workspace
+
+
+if __name__ == "__main__":
+    supervisor.runtime.autoreload = False
+    root = init_display()
+    workspace = build_workspace()
+    root.append(workspace)
 
     button_style_box = BoxButtonStyle(
         fill=_FILL,
@@ -99,6 +116,7 @@ if __name__ == "__main__":
         font=_FONT,
         font_scale=_FONT_SCALE
     )
+
     button = Button(
         text="Test",
         width=100,
@@ -109,7 +127,6 @@ if __name__ == "__main__":
     )
     workspace.append(button)
 
-    screen.append(workspace)
     count = 0
     while True:
         workspace.x = 20

@@ -1,4 +1,4 @@
-from displayio import TileGrid
+import fontio
 from adafruit_displayio_layout.widgets.widget import Widget
 from adafruit_display_shapes.rect import Rect
 from adafruit_display_shapes.roundrect import RoundRect
@@ -6,33 +6,74 @@ from adafruit_display_text.label import Label
 
 
 class Style:
-    def __init__(self, name: str = None):
-        self._name = name
+    """The way that a Widget is rendered."""
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.__dict__})"
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}('{self._name}')"
+    def render(self, widget: Widget) -> None:
+        """Takes the widget and renders the appearance of it.
 
-    def render(self, widget: Widget):
-        pass
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, new_name: str):
-        self._name = str(new_name)
+        :param widget: The widget object that should be rendered with the chosen style.
+        :type widget: widgets.StyledWidget
+        :return: None
+        """
+        raise NotImplementedError("This function should be overridden by the subclass.")
 
 
 class ButtonStyle(Style):
-    def __init__(self, fill, outline, font, font_scale, *args, **kwargs):
+    """Basic implementation of a :class:`Style`.
+
+    :param int|None fill: The color to fill the rounded-corner rectangle. Can be a hex value
+                    for a color or ``None`` for transparent.
+    :param int|None outline: The outline of the rounded-corner rectangle. Can be a hex value
+                    for a color or ``None`` for no outline.
+    :param font: A font class that has ``get_bounding_box`` and ``get_glyph``.
+      Must include a capital M for measuring character size.
+    :type font: ~fontio.FontProtocol
+    :param int font_scale: Integer value of the pixel scaling
+    """
+    def __init__(
+        self,
+        fill: int,
+        outline: int,
+        font: fontio.FontProtocol,
+        font_scale: int = 1
+    ):
         self.fill = fill
         self.outline = outline
         self.font = font
         self.font_scale = font_scale
-        super().__init__(*args, **kwargs)
+        super().__init__()
+
+        self.background = None
+        self.label = None
 
 
 class BoxButtonStyle(ButtonStyle):
+    """Renders the button in a generic rectangular box.
+
+    :param int|None fill: The color to fill the rounded-corner rectangle. Can be a hex value
+                    for a color or ``None`` for transparent.
+    :param int|None outline: The outline of the rounded-corner rectangle. Can be a hex value
+                    for a color or ``None`` for no outline.
+    :param font: A font class that has ``get_bounding_box`` and ``get_glyph``.
+           Must include a capital M for measuring character size.
+    :type font: ~fontio.FontProtocol
+    :param int font_scale: Integer value of the pixel scaling"""
+    def __init__(
+        self,
+        fill: int,
+        outline: int,
+        font: fontio.FontProtocol,
+        font_scale: int = 1
+    ):
+        super().__init__(
+            fill=fill,
+            outline=outline,
+            font=font,
+            font_scale=font_scale
+        )
+
     def render(self, widget: Widget):
         self.background = Rect(
             x=0,
@@ -60,9 +101,34 @@ class BoxButtonStyle(ButtonStyle):
 
 
 class RoundedBoxButtonStyle(ButtonStyle):
-    def __init__(self, radius, fill, outline, font, font_scale, *args, **kwargs):
+    """Renders the button in a box with rounded corners.
+
+    :param radius: The radius of the rounded corner.
+    :param int|None fill: The color to fill the rounded-corner rectangle. Can be a hex value
+                    for a color or ``None`` for transparent.
+    :param int|None outline: The outline of the rounded-corner rectangle. Can be a hex value
+                    for a color or ``None`` for no outline.
+    :param font: A font class that has ``get_bounding_box`` and ``get_glyph``.
+           Must include a capital M for measuring character size.
+    :type font: ~fontio.FontProtocol
+    :param int font_scale: Integer value of the pixel scaling
+    """
+    def __init__(
+        self,
+        radius: int,
+        fill: int,
+        outline: int,
+        font: fontio.FontProtocol,
+        font_scale: int = 1
+    ):
+        super().__init__(
+            fill=fill,
+            outline=outline,
+            font=font,
+            font_scale=font_scale
+        )
+
         self.radius = radius
-        super().__init__(fill, outline, font, font_scale, *args, **kwargs)
 
     def render(self, widget: Widget):
         self.background = RoundRect(
