@@ -24,15 +24,15 @@ class StyledWidget(Widget):
     :type style: Style
     """
     def __init__(
-            self,
-            x=0,
-            y=0,
-            scale=1,
-            width=None,
-            height=None,
-            anchor_point=None,
-            anchored_position=None,
-            style=Style()
+        self,
+        x=0,
+        y=0,
+        scale=1,
+        width=None,
+        height=None,
+        anchor_point=None,
+        anchored_position=None,
+        style=Style()
     ) -> None:
         super().__init__(
             x=x,
@@ -105,16 +105,16 @@ class Button(StyledWidget):
     :param str text: The label or name for the button.
     """
     def __init__(
-            self,
-            x=0,
-            y=0,
-            scale=1,
-            width=None,
-            height=None,
-            anchor_point=None,
-            anchored_position=None,
-            style=Style(),
-            text=None
+        self,
+        x=0,
+        y=0,
+        scale=1,
+        width=None,
+        height=None,
+        anchor_point=None,
+        anchored_position=None,
+        style=Style(),
+        text=None
     ) -> None:
         self._text = text
         super().__init__(
