@@ -8,7 +8,7 @@ try:
     from functools import partial
     from types import GeneratorType
 except (ImportError, NameError):
-    from decorators.lib.circuitpython_functools import partial
+    from decorators.applets.lib.circuitpython_functools import partial
     from _types import GeneratorType
 
 import random
