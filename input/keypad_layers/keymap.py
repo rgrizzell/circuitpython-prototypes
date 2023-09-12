@@ -30,8 +30,18 @@ class LayeredKeyMap(KeyMap):
     @layer.setter
     def layer(self, new_layer):
         """ a """
-        if new_layer in self.key_mapping.keys():
+        layers = list(self.key_mapping)
+        if new_layer in layers:
             self._layer = new_layer
+        else:
+            raise ValueError(f"Layer '{new_layer}' not in key mapping: {layers}")
+
+    def next_layer(self):
+        """ a """
+        layers = list(self.key_mapping)
+        index = layers.index(self._layer)
+        new_index = (index + 1) % len(layers)
+        self.layer = layers[new_index]
 
     def lookup(self, index, layer=None):
         """ a """

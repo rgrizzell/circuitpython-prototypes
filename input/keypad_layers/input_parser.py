@@ -1,6 +1,6 @@
 """ a """
 import supervisor
-from keymap import KeyMap
+from keymap import LayeredKeyMap
 
 try:
     from typing import Any, Dict, List, Tuple
@@ -24,14 +24,18 @@ class InputParser:
 
 class KeypadInputParser(InputParser):
     """ a """
+    SHIFT = b"\x0e"
+
     def __init__(
             self,
             device: Any,
-            keymap: KeyMap
+            keymap: LayeredKeyMap
     ):
         self.repeat_interval = 300
         self._keymap = keymap
         self._presses = dict()
+        self._double_shift = 0
+        self._double_shift_t = supervisor.ticks_ms()
         super().__init__(device=device)
 
     def initialize(self):
@@ -55,20 +59,22 @@ class KeypadInputParser(InputParser):
         while len(self._device.events) > 0:
             event = self._device.events.get()
             keycode = self._keymap.lookup(event.key_number)
-            print(f"Event: {event}")
 
             if event.pressed:
                 self._presses[event.key_number] = event.timestamp
-                # if Shift key, set the next layer, double_shift += 1
-                # else, double_shift = 0
 
             if event.released:
                 if event.key_number in self._presses.keys():
                     events.append(keycode)
                     self._presses.pop(event.key_number)
-                    # if Shift key, set the previous layer,
-                        # if double_shift == 2, set the next layer
-                    # else, double_shift = 0
+                    if keycode == self.SHIFT:
+                        if self._double_shift >= 1 and (event.timestamp - self._double_shift_t) < 1000:
+                            self._keymap.next_layer()
+                            print(f"New Layer: {self._keymap.layer}")
+                            self._double_shift = 0
+                        else:
+                            self._double_shift += 1
+                        self._double_shift_t = event.timestamp
 
         for key_number, timestamp in self._presses.items():
             now = supervisor.ticks_ms()

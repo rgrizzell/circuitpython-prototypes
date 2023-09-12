@@ -4,7 +4,7 @@ import time
 from keypad import KeyMatrix
 from input_parser import InputParser, KeypadInputParser
 from keymap import LayeredKeyMap
-
+from collections import OrderedDict
 try:
     from typing import Any
 except ImportError:
@@ -49,23 +49,23 @@ if __name__ == "__main__":
     keys_cols = [board.GP1, board.GP2, board.GP3, board.GP4, board.GP5]
     keys_rows = [board.GP6, board.GP9, board.GP15, board.GP8, board.GP7, board.GP22]
     key_layers = LayeredKeyMap(
-        key_mapping={
-            "abc": (
+        key_mapping=OrderedDict([
+            ("abc", [
                 "ent", " ", "m", "n", "b", "del", "l", "k", "j", "h",
-                "p", "o", "i", "u", "y", "alt", "z", "x", "c", "v",
+                "p", "o", "i", "u", "y", b"\x0e", "z", "x", "c", "v",
                 "a", "s", "d", "f", "g", "q", "w", "e", "r", "t",
-            ),
-            "ABC": (
+            ]),
+            ("ABC", [
                 "dn", ";", "M", "N", "B", "up", "L", "K", "J", "H",
-                "P", "O", "I", "U", "Y", "alt", "Z", "X", "C", "V",
+                "P", "O", "I", "U", "Y", b"\x0e", "Z", "X", "C", "V",
                 "A", "S", "D", "F", "G", "Q", "W", "E", "R", "T",
-            ),
-            "123": (
+            ]),
+            ("123", [
                 "rt", ",", ">", "<", "'", "lt", "-", "*", "&", "+",
-                "0", "9", "8", "7", "6", "alt", "[", "]", "?", "/",
+                "0", "9", "8", "7", "6", b"\x0e", "[", "]", "?", "/",
                 "!", "@", "#", "$", "%", "1", "2", "3", "4", "5",
-            )
-        },
+            ])
+        ]),
         default_layer="abc"
     )
     keypad = KeyMatrix(keys_rows, keys_cols)
