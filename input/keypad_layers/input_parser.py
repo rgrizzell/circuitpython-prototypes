@@ -58,7 +58,7 @@ class KeypadInputParser(InputParser):
         events = []
         while len(self._device.events) > 0:
             event = self._device.events.get()
-            keycode = self._keymap.lookup(event.key_number)
+            keycode = self._keymap[event.key_number]
 
             if event.pressed:
                 self._presses[event.key_number] = event.timestamp
@@ -66,7 +66,6 @@ class KeypadInputParser(InputParser):
             if event.released:
                 if event.key_number in self._presses.keys():
                     events.append(keycode)
-                    self._presses.pop(event.key_number)
                     if keycode == self.SHIFT:
                         if self._double_shift >= 1 and (event.timestamp - self._double_shift_t) < 1000:
                             self._keymap.next_layer()
@@ -75,11 +74,12 @@ class KeypadInputParser(InputParser):
                         else:
                             self._double_shift += 1
                         self._double_shift_t = event.timestamp
+                    self._presses.pop(event.key_number)
 
         for key_number, timestamp in self._presses.items():
             now = supervisor.ticks_ms()
             if (now - timestamp) > self.repeat_interval:
-                keycode = self._keymap.lookup(key_number)
+                keycode = self._keymap[key_number]
                 events.append(keycode)
                 self._presses[key_number] = now
 

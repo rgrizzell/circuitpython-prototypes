@@ -1,24 +1,27 @@
 """ a """
+from collections import OrderedDict
 
 
 class KeyMap:
     """ a """
-    key_mapping = ()
 
-    def __init__(self, key_mapping=None):
-        self.key_mapping = key_mapping or self.key_mapping
+    def __init__(self, key_mapping):
+        self.key_mapping = key_mapping
 
-    def lookup(self, index: int):
+    def __getitem__(self, index: int):
         """ a """
         return self.key_mapping[index]
 
 
-class LayeredKeyMap(KeyMap):
+class LayeredKeyMap:
     """ a """
-    key_mapping = {}
 
-    def __init__(self, key_mapping=None, default_layer=None, shift=None):
-        super().__init__(key_mapping=key_mapping)
+    def __init__(self, *key_mappings, default_layer=None, shift=None):
+        super().__init__()
+        self.key_mapping = OrderedDict()
+        for keymap in key_mappings:
+            self.key_mapping[keymap[0]] = KeyMap(keymap[1])
+
         self.layer = default_layer
         self.shift = shift
 
@@ -43,7 +46,6 @@ class LayeredKeyMap(KeyMap):
         new_index = (index + 1) % len(layers)
         self.layer = layers[new_index]
 
-    def lookup(self, index, layer=None):
+    def __getitem__(self, index):
         """ a """
-        layer = layer or self.layer
-        return self.key_mapping[layer][index]
+        return self.key_mapping[self.layer][index]
