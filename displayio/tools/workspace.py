@@ -79,3 +79,11 @@ def build_workspace():
     workspace.append(calibration_square)
     workspace.append(center_circle)
     return workspace
+
+
+if __name__ == "__main__":
+    screen = init_display()
+    screen.append(build_workspace())
+
+    while True:
+        time.sleep(1)
