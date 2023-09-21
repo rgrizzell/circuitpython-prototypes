@@ -34,7 +34,10 @@ class Button(Widget):
             height=None,
             anchor_point=None,
             anchored_position=None,
-            text=None
+            text=None,
+            font=terminalio.FONT,
+            fill=0x000000,
+            outline=0xFFFFFF,
     ):
         super().__init__(
             x=x,
@@ -46,6 +49,9 @@ class Button(Widget):
             anchored_position=anchored_position
         )
         self._text = text
+        self._font = font
+        self.fill = fill
+        self.outline = outline
 
         self._create_button()
 
@@ -59,14 +65,14 @@ class Button(Widget):
             y=0,
             width=self._width,
             height=self._height,
-            fill=_FILL,
-            outline=_OUTLINE,
+            fill=self.fill,
+            outline=self.outline,
             stroke=1
         )
         if self._text is not None:
             self._label = Label(
-                _FONT,
-                scale=_FONT_SCALE,
+                self._font,
+                scale=1,
                 text=self._text,
                 anchor_point=(0.5, 0.5),
                 anchored_position=(self._width // 2, self._height // 2)
@@ -160,7 +166,16 @@ if __name__ == "__main__":
     workspace.append(calibration_square)
     workspace.append(center_circle)
 
-    button = Button(text="Test", width=100, height=40, anchor_point=(0.5, 0.5), anchored_position=(100, 100))
+    button = Button(
+        text="Test",
+        width=100,
+        height=40,
+        anchor_point=(0.5, 0.5),
+        anchored_position=(100, 100),
+        font=_FONT,
+        fill=_FILL,
+        outline=_OUTLINE
+    )
     workspace.append(button)
 
     screen.append(workspace)
