@@ -3,13 +3,21 @@ from displayio import Group
 import time
 from adafruit_display_shapes.rect import Rect
 from adafruit_display_shapes.circle import Circle
+import workspace  # ../tools/workspace.py
 
 
 def filter_group(group: Group, filter_func: callable = lambda x: x) -> list:
-    """Returns a list of contents inside a :class:`displayio.Group`"""
+    """Returns a recursive list of contents inside a :class:`displayio.Group`.
+    
+    :param group: The group to filter.
+    :type group: displayio.Group
+    :param filter_func: The function used to determine if an object should be returned. Return True to include and False
+    to exclude the object.
+    :type filter_func: callable
+    """
     elements = []
     for layer in group:
-        if isinstance(layer, Group):
+        if type(layer) == Group:
             elements.append(filter_group(layer, filter_func=filter_func))
         elif filter_func(layer):
             elements.append(layer)
@@ -17,10 +25,8 @@ def filter_group(group: Group, filter_func: callable = lambda x: x) -> list:
 
 
 if __name__ == "__main__":
-    #../tools/workspace.py
-    import workspace
     screen = workspace.init_display()
-    screen.append(workspace.build_workspace())
+    screen.append(workspace.workspace())
 
     fill = 0x000000
     outline = 0xFFFFFF
@@ -52,7 +58,6 @@ if __name__ == "__main__":
     print(filter_group(screen, filter_func=lambda x: isinstance(x, Rect)))
     print("Filtered: Circle")
     print(filter_group(screen, filter_func=lambda x: isinstance(x, Circle)))
-
 
     while True:
         time.sleep(1)
