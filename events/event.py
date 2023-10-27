@@ -144,11 +144,9 @@ class EventHandler:
         """
         if event in self._handlers.keys():
             if handler:
-                while handler in self._handlers:
-                    try:
-                        self._handlers[event].remove(handler)
-                    except ValueError:
-                        pass
+                for h in self._handlers[event]:
+                    if h.func == handler:
+                        self._handlers[event].remove(h)
             else:
                 del self._handlers[event]
 
