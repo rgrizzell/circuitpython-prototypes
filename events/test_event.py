@@ -70,25 +70,25 @@ class TestEventHandler(unittest.TestCase):
     def raise_flag(*args, **kwargs):
         TestEventHandler.flag_raised = True
 
-    def test_add_callbacks(self):
-        self.event_handler.add_callbacks(self.keypress_event, self.raise_flag)
+    def test_add_handler(self):
+        self.event_handler.add_handler(self.keypress_event, self.raise_flag)
         self.assertEqual(
-            self.event_handler._callbacks[self.keypress_event],
-            [self.raise_flag],
-            "Callback not added to list of callbacks for given event.",
+            self.event_handler[self.keypress_event],
+            [self.event_handler.Handler(self.raise_flag)],
+            "Handler not added to list of handlers for given event.",
         )
 
     def test_eventhandler(self):
         self.event_handler.handle_event(self.keypress_event)
         self.assertEqual(
-            self.flag_raised, True, "Callback not executed for given event."
+            self.flag_raised, True, "Handler not executed for given event."
         )
 
-    def test_remove_callbacks(self):
-        self.event_handler.remove_callbacks(self.keypress_event, self.raise_flag)
+    def test_remove_handler(self):
+        self.event_handler.remove_handler(self.keypress_event, self.raise_flag)
         self.assertNotIn(
-            self.raise_flag, self.event_handler._callbacks[self.keypress_event],
-            "Callback not removed from list of callbacks for given event."
+            self.event_handler.Handler(self.raise_flag), self.event_handler[self.keypress_event],
+            "Handler not removed from list of handlers for given event."
         )
 
 
